@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Step 4: Integrated System Prototype (Student / Staff / HOD / Admin)</title>
+</head>
+<body>
+
+    <h1>Campus Complaint Tracking System (Integration Test)</h1>
+
+    <!-- VIEW TOGGLE BUTTONS -->
+    <div style="background-color: #eee; padding: 10px; margin-bottom: 20px;">
+        <strong>Switch Portal View:</strong>
+        <button onclick="switchView('student')">Student View</button>
+        <button onclick="switchView('staff')">Field Staff View</button>
+        <button onclick="switchView('hod')">HOD View</button>
+        <button onclick="switchView('admin')">Admin View</button>
+    </div>
+
+    <!-- ==================== 1. STUDENT SECTION ==================== -->
+    <div id="studentSection">
+        <h2>Student Portal</h2>
+
+        <h3>Submit a New Complaint</h3>
+        <form id="complaintForm" onsubmit="submitComplaint(event)">
+            <p>
+                <label>Category:</label><br>
+                <select id="catSelect" required>
+                    <option value="IT/Wi-Fi">IT / Wi-Fi Services</option>
+                    <option value="Electrical">Electrical / Maintenance</option>
+                    <option value="Plumbing">Plumbing & Sanitation</option>
+                    <option value="Academic">Academic Affairs</option>
+                </select>
+            </p>
+
+            <p>
+                <label>Description:</label><br>
+                <textarea id="descInput" rows="3" cols="40" required placeholder="Describe the issue..."></textarea>
+            </p>
+
+            <p>
+                <label>Priority:</label><br>
+                <select id="prioritySelect">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </p>
+
+            <button type="submit">Submit Complaint</button>
+        </form>
+
+        <hr>
+
+        <h3>My Submitted Complaints</h3>
+        <table border="1" cellpadding="5" id="studentTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Assigned Staff</th>
+                    <th>Status</th>
+                    <th>SLA Time Left</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- ==================== 2. STAFF SECTION ==================== -->
+    <div id="staffSection" style="display: none;">
+        <h2>Field Staff Portal</h2>
+
+        <p><strong>Select Department View:</strong></p>
+        <button onclick="filterStaffDepartment('IT/Wi-Fi')">IT / Wi-Fi Dept</button>
+        <button onclick="filterStaffDepartment('Electrical')">Electrical Dept</button>
+        <button onclick="filterStaffDepartment('Plumbing')">Plumbing Dept</button>
+        <button onclick="filterStaffDepartment('Academic')">Academic Dept</button>
+
+        <hr>
+
+        <h3 id="staffDeptHeading">Assigned Tickets (IT / Wi-Fi Dept)</h3>
+        <table border="1" cellpadding="5" id="staffTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Assigned Staff</th>
+                    <th>Status</th>
+                    <th>SLA Time Left</th>
+                    <th>Update Status</th>
+                    <th>Escalate</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- ==================== 3. HOD SECTION ==================== -->
+    <div id="hodSection" style="display: none;">
+        <h2>HOD Portal (Department Superior)</h2>
+
+        <p><strong>Select Department View:</strong></p>
+        <button onclick="filterHODDepartment('IT/Wi-Fi')">IT / Wi-Fi Dept</button>
+        <button onclick="filterHODDepartment('Electrical')">Electrical Dept</button>
+        <button onclick="filterHODDepartment('Plumbing')">Plumbing Dept</button>
+        <button onclick="filterHODDepartment('Academic')">Academic Dept</button>
+
+        <hr>
+
+        <h3 id="hodDeptHeading">Escalated Tickets - Need HOD Action (IT / Wi-Fi Dept)</h3>
+        <p>Tickets a staff member marked "Unable to Resolve" land here. Reassign them back to the
+        same staff member with a STRICT flag, or escalate further to Admin if it's still not fixable
+        at department level.</p>
+        <table border="1" cellpadding="5" id="hodEscalatedTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Assigned Staff</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <hr>
+
+        <h3>All Department Tickets (Monitoring)</h3>
+        <table border="1" cellpadding="5" id="hodAllTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Assigned Staff</th>
+                    <th>Status</th>
+                    <th>Escalation Level</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <hr>
+
+        <h3>Staff Performance - Escalation Counter (This Department)</h3>
+        <table border="1" cellpadding="5" id="hodPerformanceTable">
+            <thead>
+                <tr>
+                    <th>Staff</th>
+                    <th>Times Escalated</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- ==================== 4. ADMIN SECTION ==================== -->
+    <div id="adminSection" style="display: none;">
+        <h2>Admin Portal (Full System Control)</h2>
+
+        <h3>Level-2 Escalations - Need Admin Action</h3>
+        <p>Tickets the HOD could not resolve at department level. Admin can resolve directly or
+        force-reassign to a department.</p>
+        <table border="1" cellpadding="5" id="adminEscalatedTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Assigned Staff</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <hr>
+
+        <h3>All Complaints (System-Wide)</h3>
+        <table border="1" cellpadding="5" id="adminAllTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Assigned Staff</th>
+                    <th>Status</th>
+                    <th>Escalation Level</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <hr>
+
+        <h3>Manage Users</h3>
+        <p><em>Read-only in this prototype - full add/remove/edit comes with the database step.</em></p>
+        <table border="1" cellpadding="5" id="adminUsersTable">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <hr>
+
+        <h3>Staff Performance - Escalation Counter (System-Wide)</h3>
+        <p><em>Lower escalation count = better performance.</em></p>
+        <table border="1" cellpadding="5" id="adminPerformanceTable">
+            <thead>
+                <tr>
+                    <th>Staff</th>
+                    <th>Department</th>
+                    <th>Times Escalated</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SHARED JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // ---------- STATIC USER DATA ----------
+        // Multiple staff per department (dummy names for now - real accounts come with the DB step).
+        // escalation_count tracks how many times each staff member's tickets got escalated - this is
+        // the performance metric Admin/HOD use to judge staff.
+        let staffMembers = [
+            { staff_id: 1, name: 'Staff 1', department: 'IT/Wi-Fi',   escalation_count: 0 },
+            { staff_id: 2, name: 'Staff 2', department: 'IT/Wi-Fi',   escalation_count: 0 },
+            { staff_id: 3, name: 'Staff 3', department: 'Electrical', escalation_count: 0 },
+            { staff_id: 4, name: 'Staff 4', department: 'Electrical', escalation_count: 0 },
+            { staff_id: 5, name: 'Staff 5', department: 'Plumbing',   escalation_count: 0 },
+            { staff_id: 6, name: 'Staff 6', department: 'Plumbing',   escalation_count: 0 },
+            { staff_id: 7, name: 'Staff 7', department: 'Academic',   escalation_count: 0 },
+            { staff_id: 8, name: 'Staff 8', department: 'Academic',   escalation_count: 0 }
+        ];
+
+        // Just ONE HOD overseeing every department (not one HOD per dept)
+        let hods = [
+            { hod_id: 1, name: 'HOD 1' }
+        ];
+
+        // ---------- SLA / AUTO-ESCALATION SETTINGS ----------
+        // Kept short (5 seconds) so it's easy to test. Bump this up once the demo logic is confirmed working.
+        const SLA_SECONDS = 5;
+        function newDeadline() {
+            return Date.now() + SLA_SECONDS * 1000;
+        }
+
+        // ---------- SHARED TICKET STORAGE (In-Memory Database) ----------
+        // status values used: Open, In Progress, Resolved,
+        //                     Escalated to HOD, Escalated to Admin
+        // escalation_level: 0 = normal, 1 = escalated to HOD, 2 = escalated to Admin
+        let complaints = [
+            {
+                complaint_id: 1001,
+                category: 'IT/Wi-Fi',
+                description: 'Wi-Fi not working in Library 2nd floor',
+                priority: 'High',
+                status: 'Open',
+                assigned_staff_id: 1,
+                escalation_level: 0,
+                strict: false,
+                sla_deadline: newDeadline()
+            },
+            {
+                complaint_id: 1002,
+                category: 'Electrical',
+                description: 'Main hall ceiling fan sparking',
+                priority: 'High',
+                status: 'Open',
+                assigned_staff_id: 2,
+                escalation_level: 0,
+                strict: false,
+                sla_deadline: newDeadline()
+            }
+        ];
+
+        let currentStaffDept = 'IT/Wi-Fi';
+        let currentHODDept = 'IT/Wi-Fi';
+        let currentView = 'student';
+
+        // ---------- AUTO ESCALATION ENGINE ----------
+        // Runs every second. Any ticket still sitting with Staff (Open / In Progress)
+        // past its SLA deadline gets auto-escalated to the HOD, same as if the
+        // staff member had clicked "Unable to Resolve" themselves.
+        function checkSLABreaches() {
+            let changed = false;
+            complaints.forEach(c => {
+                const stillWithStaff = (c.status === 'Open' || c.status === 'In Progress');
+                if (stillWithStaff && c.escalation_level < 1 && Date.now() >= c.sla_deadline) {
+                    c.status = 'Escalated to HOD';
+                    c.escalation_level = 1;
+                    incrementEscalationCount(c.assigned_staff_id);
+                    changed = true;
+                }
+            });
+            if (changed) {
+                // A ticket just breached SLA - do a full re-render since status actually changed
+                console.log('One or more tickets auto-escalated to HOD due to SLA breach.');
+                renderCurrentView();
+            } else {
+                // Nothing changed - just refresh the countdown numbers.
+                // IMPORTANT: we deliberately do NOT call renderCurrentView() here, because that
+                // rebuilds the table's innerHTML every second, which force-closes any <select>
+                // dropdown the user has open (HOD/Admin reassign dropdowns, staff status dropdown).
+                updateCountdowns();
+            }
+        }
+        setInterval(checkSLABreaches, 1000);
+
+        // Lightweight update: only touches the countdown text of rows currently in the DOM,
+        // leaves every other element (including open dropdowns) untouched.
+        function updateCountdowns() {
+            complaints.forEach(c => {
+                const cell = document.getElementById(`sla-${c.complaint_id}`);
+                if (cell) cell.textContent = timeLeftLabel(c);
+            });
+        }
+
+        function renderCurrentView() {
+            if (currentView === 'student') renderStudentTable();
+            else if (currentView === 'staff') renderStaffTable();
+            else if (currentView === 'hod') renderHODTables();
+            else if (currentView === 'admin') renderAdminTables();
+        }
+
+        function timeLeftLabel(c) {
+            if (c.status === 'Resolved') return '-';
+            if (c.escalation_level >= 1) return 'escalated';
+            const secondsLeft = Math.max(0, Math.ceil((c.sla_deadline - Date.now()) / 1000));
+            return secondsLeft + 's';
+        }
+
+        // ---------- HELPERS ----------
+        function getStaffName(staffId) {
+            const s = staffMembers.find(s => s.staff_id === staffId);
+            return s ? s.name : 'Unassigned';
+        }
+
+        // Round-robin so tickets don't all pile up on one staff member in a department
+        let deptAssignPointer = {};
+
+        function findStaffForDept(dept) {
+            const deptStaff = staffMembers.filter(s => s.department === dept);
+            if (deptStaff.length === 0) return null;
+
+            const pointer = deptAssignPointer[dept] || 0;
+            const chosen = deptStaff[pointer % deptStaff.length];
+            deptAssignPointer[dept] = pointer + 1;
+
+            return chosen.staff_id;
+        }
+
+        function getStaffByDept(dept) {
+            return staffMembers.filter(s => s.department === dept);
+        }
+
+        function incrementEscalationCount(staffId) {
+            const s = staffMembers.find(s => s.staff_id === staffId);
+            if (s) s.escalation_count++;
+        }
+
+        // ---------- VIEW SWITCHING ----------
+        function switchView(viewName) {
+            currentView = viewName;
+            document.getElementById('studentSection').style.display = 'none';
+            document.getElementById('staffSection').style.display = 'none';
+            document.getElementById('hodSection').style.display = 'none';
+            document.getElementById('adminSection').style.display = 'none';
+
+            if (viewName === 'student') {
+                document.getElementById('studentSection').style.display = 'block';
+                renderStudentTable();
+            } else if (viewName === 'staff') {
+                document.getElementById('staffSection').style.display = 'block';
+                renderStaffTable();
+            } else if (viewName === 'hod') {
+                document.getElementById('hodSection').style.display = 'block';
+                renderHODTables();
+            } else if (viewName === 'admin') {
+                document.getElementById('adminSection').style.display = 'block';
+                renderAdminTables();
+            }
+        }
+
+        // ---------- STUDENT: SUBMIT COMPLAINT ----------
+        function submitComplaint(e) {
+            e.preventDefault();
+
+            const cat = document.getElementById('catSelect').value;
+            const desc = document.getElementById('descInput').value;
+            const priority = document.getElementById('prioritySelect').value;
+
+            const newId = complaints.length ? Math.max(...complaints.map(c => c.complaint_id)) + 1 : 1001;
+
+            const newTicket = {
+                complaint_id: newId,
+                category: cat,
+                description: desc,
+                priority: priority,
+                status: 'Open',
+                assigned_staff_id: findStaffForDept(cat),
+                escalation_level: 0,
+                strict: false,
+                sla_deadline: newDeadline()
+            };
+
+            complaints.push(newTicket);
+            document.getElementById('descInput').value = '';
+            alert(`Complaint #${newId} submitted successfully! Assigned to ${getStaffName(newTicket.assigned_staff_id)}.`);
+            renderStudentTable();
+        }
+
+        function renderStudentTable() {
+            const tbody = document.querySelector('#studentTable tbody');
+            tbody.innerHTML = '';
+
+            complaints.forEach(c => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>#${c.complaint_id}</td>
+                        <td>${c.category}</td>
+                        <td>${c.description}</td>
+                        <td>${c.priority}</td>
+                        <td>${getStaffName(c.assigned_staff_id)}</td>
+                        <td><strong>${c.status}</strong>${c.strict ? ' [STRICT]' : ''}</td>
+                        <td id="sla-${c.complaint_id}">${timeLeftLabel(c)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ---------- STAFF PORTAL ----------
+        function filterStaffDepartment(dept) {
+            currentStaffDept = dept;
+            document.getElementById('staffDeptHeading').textContent = `Assigned Tickets (${dept} Dept)`;
+            renderStaffTable();
+        }
+
+        function updateStaffStatus(id, newStatus) {
+            const ticket = complaints.find(c => c.complaint_id === id);
+            if (ticket) {
+                ticket.status = newStatus;
+                if (newStatus === 'Resolved') {
+                    ticket.strict = false;
+                }
+                renderStaffTable();
+            }
+        }
+
+        // Staff marks a ticket as "Unable to Resolve" -> auto escalate to HOD
+        function escalateToHOD(id) {
+            const ticket = complaints.find(c => c.complaint_id === id);
+            if (ticket) {
+                ticket.status = 'Escalated to HOD';
+                ticket.escalation_level = 1;
+                incrementEscalationCount(ticket.assigned_staff_id);
+                renderStaffTable();
+                alert(`Ticket #${id} escalated to the HOD.`);
+            }
+        }
+
+        function renderStaffTable() {
+            const tbody = document.querySelector('#staffTable tbody');
+            tbody.innerHTML = '';
+
+            const filtered = complaints.filter(c => c.category === currentStaffDept);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7">No tickets for this department.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(c => {
+                // Once escalated to HOD or Admin, staff can no longer act on it directly
+                const locked = (c.status === 'Escalated to HOD' || c.status === 'Escalated to Admin');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>#${c.complaint_id}</td>
+                        <td>${c.description}</td>
+                        <td>${c.priority}</td>
+                        <td>${getStaffName(c.assigned_staff_id)}</td>
+                        <td><strong>${c.status}</strong>${c.strict ? ' [STRICT - handle immediately]' : ''}</td>
+                        <td id="sla-${c.complaint_id}">${timeLeftLabel(c)}</td>
+                        <td>
+                            ${locked ? '(locked - awaiting HOD)' : `
+                            <select onchange="updateStaffStatus(${c.complaint_id}, this.value)">
+                                <option value="Open" ${c.status === 'Open' ? 'selected' : ''}>Open</option>
+                                <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                <option value="Resolved" ${c.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                            </select>`}
+                        </td>
+                        <td>
+                            ${locked || c.status === 'Resolved' ? '-' : `<button onclick="escalateToHOD(${c.complaint_id})">Unable to Resolve</button>`}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ---------- HOD PORTAL ----------
+        function filterHODDepartment(dept) {
+            currentHODDept = dept;
+            document.getElementById('hodDeptHeading').textContent = `Escalated Tickets - Need HOD Action (${dept} Dept)`;
+            renderHODTables();
+        }
+
+        // HOD picks any staff member in the department (dropdown) and reassigns with a STRICT flag
+        function reassignStrict(id) {
+            const ticket = complaints.find(c => c.complaint_id === id);
+            if (!ticket) return;
+
+            const select = document.getElementById(`hodReassignSelect-${id}`);
+            const chosenStaffId = select ? parseInt(select.value) : ticket.assigned_staff_id;
+
+            ticket.assigned_staff_id = chosenStaffId;
+            ticket.status = 'Open';
+            ticket.strict = true;
+            ticket.sla_deadline = newDeadline();
+            // escalation_level stays at 1, so we remember it was escalated before
+
+            renderHODTables();
+            alert(`Ticket #${id} reassigned to ${getStaffName(chosenStaffId)} with a STRICT flag.`);
+        }
+
+        // HOD escalates further to Admin (Level 2)
+        function escalateToAdmin(id) {
+            const ticket = complaints.find(c => c.complaint_id === id);
+            if (ticket) {
+                ticket.status = 'Escalated to Admin';
+                ticket.escalation_level = 2;
+                renderHODTables();
+                alert(`Ticket #${id} escalated to Admin (Level 2).`);
+            }
+        }
+
+        function renderHODTables() {
+            const escBody = document.querySelector('#hodEscalatedTable tbody');
+            escBody.innerHTML = '';
+
+            const escalated = complaints.filter(c =>
+                c.category === currentHODDept && c.status === 'Escalated to HOD'
+            );
+
+            if (escalated.length === 0) {
+                escBody.innerHTML = `<tr><td colspan="6">No tickets currently escalated to HOD for this department.</td></tr>`;
+            } else {
+                escalated.forEach(c => {
+                    escBody.innerHTML += `
+                        <tr>
+                            <td>#${c.complaint_id}</td>
+                            <td>${c.description}</td>
+                            <td>${c.priority}</td>
+                            <td>${getStaffName(c.assigned_staff_id)}</td>
+                            <td><strong>${c.status}</strong></td>
+                            <td>
+                                <select id="hodReassignSelect-${c.complaint_id}">
+                                    ${getStaffByDept(c.category).map(s =>
+                                        `<option value="${s.staff_id}" ${s.staff_id === c.assigned_staff_id ? 'selected' : ''}>${s.name} (Escalations: ${s.escalation_count})</option>`
+                                    ).join('')}
+                                </select>
+                                <button onclick="reassignStrict(${c.complaint_id})">Reassign (Strict)</button>
+                                <button onclick="escalateToAdmin(${c.complaint_id})">Escalate to Admin</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const allBody = document.querySelector('#hodAllTable tbody');
+            allBody.innerHTML = '';
+
+            const allDeptTickets = complaints.filter(c => c.category === currentHODDept);
+
+            allDeptTickets.forEach(c => {
+                allBody.innerHTML += `
+                    <tr>
+                        <td>#${c.complaint_id}</td>
+                        <td>${c.description}</td>
+                        <td>${c.priority}</td>
+                        <td>${getStaffName(c.assigned_staff_id)}</td>
+                        <td>${c.status}${c.strict ? ' [STRICT]' : ''}</td>
+                        <td>${c.escalation_level}</td>
+                    </tr>
+                `;
+            });
+
+            const hodPerfBody = document.querySelector('#hodPerformanceTable tbody');
+            hodPerfBody.innerHTML = '';
+
+            const deptStaffSorted = getStaffByDept(currentHODDept)
+                .slice()
+                .sort((a, b) => a.escalation_count - b.escalation_count);
+
+            deptStaffSorted.forEach(s => {
+                hodPerfBody.innerHTML += `<tr><td>${s.name}</td><td>${s.escalation_count}</td></tr>`;
+            });
+        }
+
+        // ---------- ADMIN PORTAL ----------
+        function adminResolve(id) {
+            const ticket = complaints.find(c => c.complaint_id === id);
+            if (ticket) {
+                ticket.status = 'Resolved';
+                ticket.strict = false;
+                renderAdminTables();
+            }
+        }
+
+        // Admin picks any staff member from the concerning department (dropdown) and reassigns as strict
+        function adminReassignToDept(id) {
+            const ticket = complaints.find(c => c.complaint_id === id);
+            if (!ticket) return;
+
+            const select = document.getElementById(`adminReassignSelect-${id}`);
+            const chosenStaffId = select ? parseInt(select.value) : ticket.assigned_staff_id;
+
+            ticket.assigned_staff_id = chosenStaffId;
+            ticket.status = 'Open';
+            ticket.strict = true;
+            ticket.escalation_level = 1; // still remembers it was escalated once
+            ticket.sla_deadline = newDeadline();
+
+            renderAdminTables();
+            alert(`Ticket #${id} reassigned to ${getStaffName(chosenStaffId)} (${ticket.category}) as a STRICT ticket.`);
+        }
+
+        function renderAdminTables() {
+            const escBody = document.querySelector('#adminEscalatedTable tbody');
+            escBody.innerHTML = '';
+
+            const level2 = complaints.filter(c => c.status === 'Escalated to Admin');
+
+            if (level2.length === 0) {
+                escBody.innerHTML = `<tr><td colspan="7">No tickets currently at Level-2 escalation.</td></tr>`;
+            } else {
+                level2.forEach(c => {
+                    escBody.innerHTML += `
+                        <tr>
+                            <td>#${c.complaint_id}</td>
+                            <td>${c.category}</td>
+                            <td>${c.description}</td>
+                            <td>${c.priority}</td>
+                            <td>${getStaffName(c.assigned_staff_id)}</td>
+                            <td><strong>${c.status}</strong></td>
+                            <td>
+                                <select id="adminReassignSelect-${c.complaint_id}">
+                                    ${getStaffByDept(c.category).map(s =>
+                                        `<option value="${s.staff_id}" ${s.staff_id === c.assigned_staff_id ? 'selected' : ''}>${s.name} (Escalations: ${s.escalation_count})</option>`
+                                    ).join('')}
+                                </select>
+                                <button onclick="adminResolve(${c.complaint_id})">Mark Resolved</button>
+                                <button onclick="adminReassignToDept(${c.complaint_id})">Reassign (Strict)</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const allBody = document.querySelector('#adminAllTable tbody');
+            allBody.innerHTML = '';
+
+            complaints.forEach(c => {
+                allBody.innerHTML += `
+                    <tr>
+                        <td>#${c.complaint_id}</td>
+                        <td>${c.category}</td>
+                        <td>${c.description}</td>
+                        <td>${c.priority}</td>
+                        <td>${getStaffName(c.assigned_staff_id)}</td>
+                        <td>${c.status}${c.strict ? ' [STRICT]' : ''}</td>
+                        <td>${c.escalation_level}</td>
+                    </tr>
+                `;
+            });
+
+            const usersBody = document.querySelector('#adminUsersTable tbody');
+            usersBody.innerHTML = '';
+
+            staffMembers.forEach(s => {
+                usersBody.innerHTML += `<tr><td>Staff</td><td>${s.name}</td><td>${s.department}</td></tr>`;
+            });
+            hods.forEach(h => {
+                usersBody.innerHTML += `<tr><td>HOD</td><td>${h.name}</td><td>All Departments</td></tr>`;
+            });
+
+            const adminPerfBody = document.querySelector('#adminPerformanceTable tbody');
+            adminPerfBody.innerHTML = '';
+
+            // Best performance (fewest escalations) first, worst last - the almighty Admin judges all
+            const sortedStaff = [...staffMembers].sort((a, b) => a.escalation_count - b.escalation_count);
+
+            sortedStaff.forEach(s => {
+                adminPerfBody.innerHTML += `<tr><td>${s.name}</td><td>${s.department}</td><td>${s.escalation_count}</td></tr>`;
+            });
+        }
+
+        // Initial load on Student View
+        renderStudentTable();
+    </script>
+
+</body>
+</html>

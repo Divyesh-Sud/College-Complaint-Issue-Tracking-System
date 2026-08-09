@@ -1,0 +1,129 @@
+/* ============================================================
+   Campus Complaint Tracking System - Core Stylesheet
+   Kept deliberately simple: readability and structure only,
+   no animations, gradients, or decorative flourishes.
+   ============================================================ */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #222222;
+    background-color: #fafafa;
+    line-height: 1.4;
+}
+
+h1 {
+    font-size: 1.6rem;
+    border-bottom: 2px solid #333333;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 1.3rem;
+    margin-top: 0;
+}
+
+h3 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+}
+
+p {
+    margin: 6px 0 12px 0;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #cccccc;
+    margin: 20px 0;
+}
+
+/* ---------------- Buttons ---------------- */
+button {
+    padding: 6px 12px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    border: 1px solid #999999;
+    background-color: #ffffff;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.9rem;
+}
+
+button:hover {
+    background-color: #e6e6e6;
+}
+
+/* ---------------- Forms ---------------- */
+form p {
+    margin: 10px 0;
+}
+
+label {
+    font-weight: bold;
+}
+
+textarea,
+select,
+input[type="text"] {
+    padding: 5px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    border: 1px solid #aaaaaa;
+    border-radius: 3px;
+}
+
+/* ---------------- Tables ---------------- */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+    background-color: #ffffff;
+}
+
+th,
+td {
+    border: 1px solid #cccccc;
+    padding: 8px;
+    text-align: left;
+    font-size: 0.9rem;
+    vertical-align: top;
+}
+
+th {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+tr:nth-child(even) td {
+    background-color: #f3f3f3;
+}
+
+td strong {
+    white-space: nowrap;
+}
+
+/* ---------------- Portal sections ---------------- */
+#studentSection,
+#staffSection,
+#hodSection,
+#adminSection {
+    background-color: #ffffff;
+    padding: 16px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+/* View toggle bar - overrides the inline style already on that div in Main.html.
+   You can drop the inline style="..." attribute from that div now if you want,
+   this class-free selector targets it either way since it's a direct child of body. */
+body > div:first-of-type {
+    background-color: #eeeeee;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
