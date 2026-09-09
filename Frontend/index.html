@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Complaint Tracking System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ✅ EXTERNAL CSS - Make sure styles.css is in the same folder -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="app-container">
+
+        <!-- ===== HEADER ===== -->
+        <header class="app-header">
+            <div class="header-left">
+                <span class="logo-icon"><i class="fas fa-ticket-alt"></i></span>
+                <div>
+                    <h1>Campus Complaint Tracking System</h1>
+                    <span class="subtitle"><i class="fas fa-university"></i> Complete Issue Management Solution</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="number" id="totalComplaints">0</span>
+                    <span class="label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number" id="openComplaints">0</span>
+                    <span class="label">Open</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number" id="resolvedComplaints">0</span>
+                    <span class="label">Resolved</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number" id="escalatedComplaints">0</span>
+                    <span class="label">Escalated</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== VIEW TABS ===== -->
+        <div class="view-tabs">
+            <span class="tabs-label"><i class="fas fa-users-cog"></i> Switch Portal:</span>
+            <button class="active" data-view="student">
+                <i class="fas fa-user-graduate"></i> Student
+                <span class="badge" id="studentBadge">0</span>
+            </button>
+            <button data-view="staff">
+                <i class="fas fa-tools"></i> Staff
+                <span class="badge" id="staffBadge">0</span>
+            </button>
+            <button data-view="hod">
+                <i class="fas fa-user-tie"></i> HOD
+                <span class="badge" id="hodBadge">0</span>
+            </button>
+            <button data-view="admin">
+                <i class="fas fa-user-shield"></i> Admin
+            </button>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ==================== STUDENT SECTION ======================== -->
+        <!-- ============================================================ -->
+        <div id="studentSection" class="section active">
+            <div class="section-header">
+                <h2><i class="fas fa-user-graduate"></i> Student Portal</h2>
+                <div class="section-actions">
+                    <button class="btn btn-outline btn-sm" onclick="resetForm()">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit Complaint -->
+            <div class="form-card">
+                <h3 style="margin-bottom: 18px; color: var(--text-primary);">
+                    <i class="fas fa-plus-circle" style="color: var(--primary);"></i> Submit New Complaint
+                </h3>
+                <form id="complaintForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category <span class="required">*</span></label>
+                            <select id="catSelect" required>
+                                <option value="IT/Wi-Fi">🖥️ IT / Wi-Fi Services</option>
+                                <option value="Electrical">⚡ Electrical / Maintenance</option>
+                                <option value="Plumbing">🔧 Plumbing & Sanitation</option>
+                                <option value="Academic">📚 Academic Affairs</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority <span class="required">*</span></label>
+                            <select id="prioritySelect">
+                                <option value="Low">🟢 Low</option>
+                                <option value="Medium" selected>🟡 Medium</option>
+                                <option value="High">🔴 High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description <span class="required">*</span></label>
+                        <textarea id="descInput" rows="3" required placeholder="Describe your issue in detail..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Complaint
+                    </button>
+                </form>
+            </div>
+
+            <!-- My Complaints -->
+            <h3 style="margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-list-ul" style="color: var(--primary);"></i> My Submitted Complaints
+                <span style="font-size: 13px; font-weight: 400; color: var(--text-light);" id="studentCount"></span>
+            </h3>
+            <div class="table-wrapper">
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Assigned Staff</th>
+                            <th>Status</th>
+                            <th>SLA Time Left</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ==================== STAFF SECTION ========================== -->
+        <!-- ============================================================ -->
+        <div id="staffSection" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-tools"></i> Field Staff Portal</h2>
+                <div class="section-actions">
+                    <span style="font-size: 13px; color: var(--text-light);">
+                        <i class="fas fa-clock"></i> SLA: <strong id="slaDisplay">30s</strong>
+                    </span>
+                </div>
+            </div>
+
+            <div class="dept-filters">
+                <button class="active-filter" data-staff-dept="IT/Wi-Fi">🖥️ IT / Wi-Fi</button>
+                <button data-staff-dept="Electrical">⚡ Electrical</button>
+                <button data-staff-dept="Plumbing">🔧 Plumbing</button>
+                <button data-staff-dept="Academic">📚 Academic</button>
+            </div>
+
+            <h3 id="staffDeptHeading" style="margin-bottom: 15px;">
+                <i class="fas fa-tasks" style="color: var(--primary);"></i> Assigned Tickets (IT / Wi-Fi Dept)
+            </h3>
+            <div class="table-wrapper">
+                <table id="staffTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Assigned Staff</th>
+                            <th>Status</th>
+                            <th>SLA Left</th>
+                            <th>Update Status</th>
+                            <th>Escalate</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ==================== HOD SECTION ============================ -->
+        <!-- ============================================================ -->
+        <div id="hodSection" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-tie"></i> HOD Portal</h2>
+            </div>
+
+            <div class="dept-filters">
+                <button class="active-filter" data-hod-dept="IT/Wi-Fi">🖥️ IT / Wi-Fi</button>
+                <button data-hod-dept="Electrical">⚡ Electrical</button>
+                <button data-hod-dept="Plumbing">🔧 Plumbing</button>
+                <button data-hod-dept="Academic">📚 Academic</button>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Escalated Tickets:</strong> Staff members who marked tickets as "Unable to Resolve" appear here.
+                    <strong>Reassign</strong> with a STRICT flag for immediate attention, or <strong>Escalate to Admin</strong> for higher-level intervention.
+                </div>
+            </div>
+
+            <h3 id="hodDeptHeading" style="margin-bottom: 15px;">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i> Escalated Tickets (IT / Wi-Fi Dept)
+            </h3>
+            <div class="table-wrapper">
+                <table id="hodEscalatedTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Assigned Staff</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">
+                <i class="fas fa-chart-simple" style="color: var(--primary);"></i> All Department Tickets
+            </h3>
+            <div class="table-wrapper">
+                <table id="hodAllTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Assigned Staff</th>
+                            <th>Status</th>
+                            <th>Escalation Level</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">
+                <i class="fas fa-chart-bar" style="color: var(--primary);"></i> Staff Performance - Escalation Counter
+            </h3>
+            <div class="table-wrapper">
+                <table id="hodPerformanceTable">
+                    <thead>
+                        <tr>
+                            <th>Staff</th>
+                            <th>Times Escalated</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ==================== ADMIN SECTION ========================== -->
+        <!-- ============================================================ -->
+        <div id="adminSection" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-shield"></i> Admin Portal</h2>
+                <div class="section-actions">
+                    <span style="font-size: 13px; color: var(--text-light);">
+                        <i class="fas fa-database"></i> System-Wide Control
+                    </span>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Level-2 Escalations:</strong> Tickets that HOD could not resolve at department level.
+                    Admin can <strong>Resolve</strong> directly or <strong>Reassign</strong> with STRICT flag to any staff member.
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 15px;">
+                <i class="fas fa-fire" style="color: var(--danger);"></i> Level-2 Escalations - Need Admin Action
+            </h3>
+            <div class="table-wrapper">
+                <table id="adminEscalatedTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Assigned Staff</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">
+                <i class="fas fa-list-check" style="color: var(--primary);"></i> All Complaints (System-Wide)
+            </h3>
+            <div class="table-wrapper">
+                <table id="adminAllTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Assigned Staff</th>
+                            <th>Status</th>
+                            <th>Escalation Level</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">
+                <i class="fas fa-users" style="color: var(--primary);"></i> System Users
+            </h3>
+            <div class="table-wrapper">
+                <table id="adminUsersTable">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">
+                <i class="fas fa-trophy" style="color: var(--primary);"></i> Staff Performance (System-Wide)
+                <span style="font-size: 13px; font-weight: 400; color: var(--text-light); margin-left: 10px;">
+                    ⬇️ Lower escalation count = better performance
+                </span>
+            </h3>
+            <div class="table-wrapper">
+                <table id="adminPerformanceTable">
+                    <thead>
+                        <tr>
+                            <th>Staff</th>
+                            <th>Department</th>
+                            <th>Times Escalated</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="app-footer">
+            <p>
+                <i class="fas fa-copyright"></i> 2026 Campus Complaint Tracking System | 
+                <i class="fas fa-code"></i> Built with <i class="fas fa-heart" style="color: var(--danger);"></i> for Academic Excellence
+            </p>
+            <p style="font-size: 12px; color: var(--text-light);">
+                <i class="fas fa-clock"></i> SLA: <span id="footerSLA">30</span> seconds | 
+                <i class="fas fa-flag"></i> Auto-escalation enabled
+            </p>
+        </footer>
+    </div>
+
+    <!-- ✅ EXTERNAL JAVASCRIPT - Make sure script.js is in the same folder -->
+    <script src="script.js"></script>
+</body>
+</html>
