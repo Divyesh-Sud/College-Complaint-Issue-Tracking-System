@@ -11,7 +11,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- ✅ EXTERNAL CSS - Make sure styles.css is in the same folder -->
+    <!-- External CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -27,7 +27,12 @@
                 <span class="logo-icon"><i class="fas fa-ticket-alt"></i></span>
                 <div>
                     <h1>Campus Complaint Tracking System</h1>
-                    <span class="subtitle"><i class="fas fa-university"></i> Complete Issue Management Solution</span>
+                    <span class="subtitle">
+                        <i class="fas fa-university"></i> Complete Issue Management Solution
+                        <span id="connectionStatus" class="connection-status">
+                            <i class="fas fa-circle"></i> Connecting...
+                        </span>
+                    </span>
                 </div>
             </div>
             <div class="header-stats">
@@ -109,18 +114,22 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label>Your Name <span class="required">*</span></label>
+                        <input type="text" id="studentName" required placeholder="Enter your name..." maxlength="40">
+                    </div>
+                    <div class="form-group">
                         <label>Description <span class="required">*</span></label>
                         <textarea id="descInput" rows="3" required placeholder="Describe your issue in detail..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
                         <i class="fas fa-paper-plane"></i> Submit Complaint
                     </button>
                 </form>
             </div>
 
-            <!-- My Complaints -->
+            <!-- All Complaints (Live) -->
             <h3 style="margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-list-ul" style="color: var(--primary);"></i> My Submitted Complaints
+                <i class="fas fa-list-ul" style="color: var(--primary);"></i> All Complaints (Live)
                 <span style="font-size: 13px; font-weight: 400; color: var(--text-light);" id="studentCount"></span>
             </h3>
             <div class="table-wrapper">
@@ -128,6 +137,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Submitted By</th>
                             <th>Category</th>
                             <th>Description</th>
                             <th>Priority</th>
@@ -149,7 +159,7 @@
                 <h2><i class="fas fa-tools"></i> Field Staff Portal</h2>
                 <div class="section-actions">
                     <span style="font-size: 13px; color: var(--text-light);">
-                        <i class="fas fa-clock"></i> SLA: <strong id="slaDisplay">30s</strong>
+                        <i class="fas fa-clock"></i> SLA: <strong id="slaDisplay">24 Hours</strong>
                     </span>
                 </div>
             </div>
@@ -268,6 +278,9 @@
             <div class="section-header">
                 <h2><i class="fas fa-user-shield"></i> Admin Portal</h2>
                 <div class="section-actions">
+                    <button class="btn btn-danger btn-sm" onclick="clearAllData()">
+                        <i class="fas fa-trash"></i> Reset All Data
+                    </button>
                     <span style="font-size: 13px; color: var(--text-light);">
                         <i class="fas fa-database"></i> System-Wide Control
                     </span>
@@ -366,13 +379,60 @@
                 <i class="fas fa-code"></i> Built with <i class="fas fa-heart" style="color: var(--danger);"></i> for Academic Excellence
             </p>
             <p style="font-size: 12px; color: var(--text-light);">
-                <i class="fas fa-clock"></i> SLA: <span id="footerSLA">30</span> seconds | 
-                <i class="fas fa-flag"></i> Auto-escalation enabled
+                <i class="fas fa-clock"></i> SLA: 24 Hours | 
+                <i class="fas fa-bolt"></i> Real-time Firebase Sync
             </p>
         </footer>
     </div>
 
-    <!-- ✅ EXTERNAL JAVASCRIPT - Make sure script.js is in the same folder -->
-    <script src="script.js"></script>
+    <!-- ============================================================
+         FIREBASE SDK + CONFIG
+         ============================================================ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getFirestore, collection, addDoc, onSnapshot, 
+            doc, updateDoc, deleteDoc, getDocs, query, orderBy, setDoc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 🔥 ============================================
+        //    PASTE YOUR FIREBASE CONFIG BELOW
+        //    (Replace each PASTE_YOUR_... with your real value)
+        // ============================================
+         const firebaseConfig = {
+            apiKey: "AIzaSyBmklOyWge7qXYBonZUpLgOF4tUrMkRkKE",
+            authDomain: "campus-complaints-898e2.firebaseapp.com",
+            projectId: "campus-complaints-898e2",
+            storageBucket: "campus-complaints-898e2.firebasestorage.app",
+            messagingSenderId: "550725657183",
+            appId: "1:550725657183:web:8c1837b54e8eaa89fe71ea"
+    };
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Expose Firebase functions to global scope for script.js
+        window.fb = {
+            db,
+            collection,
+            addDoc,
+            onSnapshot,
+            doc,
+            updateDoc,
+            deleteDoc,
+            getDocs,
+            query,
+            orderBy,
+            setDoc
+        };
+
+        console.log('🔥 Firebase initialized');
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <!-- ============================================================
+         MAIN APPLICATION SCRIPT (deferred so it runs after HTML parses)
+         ============================================================ -->
+    <script src="script.js" defer></script>
 </body>
 </html>
